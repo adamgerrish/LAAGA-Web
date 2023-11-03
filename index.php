@@ -10,80 +10,6 @@ if ($status == 1) {
     exit; // Stop execution if the connection failed
 }
 
-// Define a function to create and populate a table
-function createAndPopulateTable($conn, $tableName)
-{
-    echo '<table id="' . $tableName . '-table" class="rounds hidden">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Course</th>
-                    <th>Par</th>
-                    <th>Rating</th>
-                    <th>Slope</th>
-                    <th>Score</th>
-                    <th>Handicap</th>
-                </tr>
-            </thead>
-            <tbody>';
-
-    $result = $conn->query("SELECT * FROM $tableName");
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            echo '<tr>
-                    <td>' . $row["id"] . '</td>
-                    <td>' . $row["Course"] . '</td>
-                    <td>' . $row["Par"] . '</td>
-                    <td>' . $row["Rating"] . '</td>
-                    <td>' . $row["Slope"] . '</td>
-                    <td>' . $row["Score"] . '</td>
-                    <td>' . $row["Handicap"] . '</td>
-                </tr>';
-        }
-    }
-
-    echo '</tbody></table>';
-}
-
-// Define a function to check and import a table
-function checkAndImportTable($conn, $tableName, $sqlFile)
-{
-    // Check if the table exists
-    $result = $conn->query("SHOW TABLES LIKE '$tableName'");
-    $tableExists = $result->num_rows > 0;
-
-    // Free the result set
-    $result->free();
-
-    if (!$tableExists) {
-        // Table doesn't exist, import the SQL file to create it
-        $sqlInsertData = file_get_contents($sqlFile);
-        if (mysqli_multi_query($conn, $sqlInsertData)) {
-            // Import successful, you can handle the result if needed
-        } else {
-            // Import failed, handle the error
-            echo "Failed to import $tableName Table<br>";
-            echo mysqli_error($conn);
-            exit; // Stop execution if the import failed
-        }
-    }
-}
-
-
-checkAndImportTable($conn, 'AtkinsonRounds', 'table_atkinson.sql');
-checkAndImportTable($conn, 'CharetteRounds', 'table_charette.sql');
-checkAndImportTable($conn, 'ChilcoatRounds', 'table_chilcoat.sql');
-checkAndImportTable($conn, 'GerrishRounds', 'table_gerrish.sql');
-checkAndImportTable($conn, 'GuarasciRounds', 'table_guarasci.sql');
-checkAndImportTable($conn, 'JanisseRounds', 'table_janisse.sql');
-checkAndImportTable($conn, 'KwardRounds', 'table_kward.sql');
-checkAndImportTable($conn, 'LannoRounds', 'table_lanno.sql');
-checkAndImportTable($conn, 'LearnRounds', 'table_learn.sql');
-checkAndImportTable($conn, 'MwardRounds', 'table_mward.sql');
-checkAndImportTable($conn, 'RinaldiRounds', 'table_rinaldi.sql');
-checkAndImportTable($conn, 'ShawRounds', 'table_shaw.sql');
-checkAndImportTable($conn, 'WhittyRounds', 'table_whitty.sql');
-
 CloseDB($conn);
 ?>
 
@@ -138,13 +64,75 @@ CloseDB($conn);
     </section>
     <!------ROUNDS------->
     <section class="tables">
-        <style>
+            <style>
+            /* Style for labels within the form */
+            .form-label {
+                color: white;
+                display: inline-block;
+                width: 100px;
+                text-align: right;
+                margin-right: 10px;
+            }
+
+            /* Style for the form fields */
+            input[type="text"],
+            input[type="number"],
+            select {
+                width: 200px;
+            }
+
+            /* Style for the form container */
+            form {
+                text-align: center;
+                margin-right: 50px;
+            }
+
+            /* Other styles in your "ROUNDS" section */
             body {
                 background-color: #255c25;
             }
+            input[type="submit"] {
+                background-color: #cf4044;
+                color: white;
+                padding: 10px 20px; /* Adjust the padding as needed */
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                margin-top: 10px;
+
+}
         </style>
-        <h2>Rounds</h2>
+
         <div class="dropdown">
+            <h2>Add a Round</h2>
+            <form method="post" action="process_form.php">
+                <label for="player_id" class="form-label">Player:</label>
+                <select name="player_id">
+                    <option value="1">Aaron Atkinson</option>
+                    <!-- Add more players here -->
+                </select><br>
+                
+                <label for="course" class="form-label">Course:</label>
+                <input type="text" name="course"><br>
+                
+                <label for="par" class="form-label">Par:</label>
+                <input type="number" name="par"><br>
+                
+                <label for="rating" class="form-label">Rating:</label>
+                <input type="number" step="0.01" name="rating"><br>
+                
+                <label for="slope" class="form-label">Slope:</label>
+                <input type="number" name="slope"><br>
+                
+                <label for="score" class="form-label">Score:</label>
+                <input type="number" name="score"><br>
+                
+                <label for="handicap" class="form-label">Handicap:</label>
+                <input type="number" step="0.01" name="handicap"><br>
+                
+                <input type="submit" value="Submit">
+            </form>
+            <h2>Rounds</h2>
             <label for="names">Select a name to view all of their rounds:</label>
             <select id="names" onchange="toggleTableVisibility()">
                 <!-- Names as options -->
@@ -201,439 +189,6 @@ CloseDB($conn);
                 </tbody>
             </table>
         </div>
-
-        <div class="table-container">
-            <table id="charette-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM CharetteRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="chilcoat-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM ChilcoatRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="gerrish-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM GerrishRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="guarasci-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM GuarasciRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="janisse-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM JanisseRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="lanno-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM LannoRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="learn-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM LearnRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="rinaldi-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM RinaldiRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="shaw-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM ShawRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="kward-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM KwardRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="mward-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM MwardRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="table-container">
-            <table id="whitty-table" class="rounds hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Course</th>
-                        <th>Par</th>
-                        <th>Rating</th>
-                        <th>Slope</th>
-                        <th>Score</th>
-                        <th>Handicap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $conn = OpenDB();
-                    $result = $conn->query("SELECT * FROM WhittyRounds");
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo '<tr>
-                                <td>' . $row["id"] . '</td>
-                                <td>' . $row["Course"] . '</td>
-                                <td>' . $row["Par"] . '</td>
-                                <td>' . $row["Rating"] . '</td>
-                                <td>' . $row["Slope"] . '</td>
-                                <td>' . $row["Score"] . '</td>
-                                <td>' . $row["Handicap"] . '</td>
-                            </tr>';
-                        }
-                    }
-                    CloseDB($conn);
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
     </section>
 
     <!------JavaScript for Menu------>
